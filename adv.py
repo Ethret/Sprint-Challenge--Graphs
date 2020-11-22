@@ -29,7 +29,44 @@ player = Player(world.starting_room)
 # traversal_path = ['n', 'n']
 traversal_path = []
 
+visited = set()
 
+#define opposite directions
+opposites = {'n':'s', 's':'n', 'e':'w', 'w':'e'}
+traversal_graph = {}
+def traverse_graph():
+    #keep track of the moves
+    moves = []
+    #create current room's entry
+    traversal_graph[player.current_room.id] = {}
+    #for next exit from current
+    for next_exit in player.current_room.get_exits():
+        #hold where we are
+        prev = player.current_room.id
+        #leave where we are, enter next room
+        player.travel(next_exit)
+        #update graph with new direction information
+        traversal_graph[prev][next_exit] = player.current_room.id
+        #if we've been here before
+        if player.current_room in visited:
+            #go back
+            player.travel(opposites[next_exit])
+        #otherwise
+        else:
+            #add current room to the visited rooms
+            visited.add(player.current_room)
+            #add which direction we went to our moves
+            moves.append(next_exit)
+            #recurse, then add any extra moves we made
+            moves.extend(traverse_graph())
+            #go back
+            player.travel(opposites[next_exit])
+            #tell em we went back
+            moves.append(opposites[next_exit])
+    return moves
+
+traversal_path = traverse_graph()
+print(traversal_path)
 
 # TRAVERSAL TEST - DO NOT MODIFY
 visited_rooms = set()
@@ -51,12 +88,12 @@ else:
 #######
 # UNCOMMENT TO WALK AROUND
 #######
-player.current_room.print_room_description(player)
-while True:
-    cmds = input("-> ").lower().split(" ")
-    if cmds[0] in ["n", "s", "e", "w"]:
-        player.travel(cmds[0], True)
-    elif cmds[0] == "q":
-        break
-    else:
-        print("I did not understand that command.")
+#player.current_room.print_room_description(player)
+#while True:
+#    cmds = input("-> ").lower().split(" ")
+#    if cmds[0] in ["n", "s", "e", "w"]:
+#        player.travel(cmds[0], True)
+#    elif cmds[0] == "q":
+#        break
+#    else:
+#        print("I did not understand that command.")
